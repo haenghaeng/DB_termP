@@ -23,12 +23,12 @@ def view_soldiers(cursor):
 
 # 특정 역할의 병사 목록 조회
 def view_soldiers_by_role(cursor, role):
-    cursor.execute('''SELECT soldier_id, name, address, family_relationship, birthdate FROM PersonalInformation WHERE role = %s''', (role,))
+    cursor.execute('''SELECT soldier_id, name, address, family_relationship, birthdate, role FROM PersonalInformation WHERE role = %s''', (role,))
     soldiers = cursor.fetchall()
     if soldiers:
         print(f"\n{role} 목록:")
         for soldier in soldiers:
-            print(f"ID: {soldier[0]}, 이름: {soldier[1]}, 주소: {soldier[2]}, 가족 관계: {soldier[3]}, 생년월일: {soldier[4]}")
+            print(f"ID: {soldier[0]}, 이름: {soldier[1]}, 주소: {soldier[2]}, 가족 관계: {soldier[3]}, 생년월일: {soldier[4]}, 역할: {soldier[5]}")
     else:
         print(f"{role}에 해당하는 병사가 없습니다.")
 
@@ -169,58 +169,42 @@ def add_training(cursor, soldier_id, training_date, training_details):
                       VALUES (%s, %s, %s)''', (soldier_id, training_date, training_details))
     print("훈련 일정이 추가되었습니다.")
 
-# 특정 역할의 병사들에게 훈련 일정 조회
-def get_training_by_role(cursor, role):
-    cursor.execute('''SELECT ts.schedule_id, pi.name, ts.training_date, ts.training_details
+# 모든 병사의 훈련 일정 조회
+def get_all_trainings(cursor):
+    cursor.execute('''SELECT pi.soldier_id, pi.name, pi.role, ts.training_date, ts.training_details
                       FROM TrainingSchedule ts
                       JOIN PersonalInformation pi ON ts.soldier_id = pi.soldier_id
-                      WHERE pi.role = %s
-                      ORDER BY ts.training_date''', (role,))
+                      ORDER BY pi.soldier_id''')
     return cursor.fetchall()
+
 
 # 훈련 일정 관리 기능
 def manage_training_schedule(cursor):
     while True:
         print("\n훈련 일정 관리")
         print("1. 훈련 일정 추가")
-        print("2. 훈련 일정 조회")
+        print("2. 모든 병사의 훈련 일정 조회")
         print("3. 종료")
         
         choice = input("원하는 기능의 번호를 선택하세요: ")
 
         if choice == '1':
+            # 모든 병사 정보 조회
+            view_soldiers(cursor)  # 병사 목록 조회
+            
             soldier_id = int(input("병사 ID: "))
             training_date = input("훈련 날짜 (YYYY-MM-DD): ")
             training_details = input("훈련 상세 내용: ")
             add_training(cursor, soldier_id, training_date, training_details)
 
         elif choice == '2':
-            print("\n조회할 병사의 역할 선택")
-            print("1. 무선병")
-            print("2. 유선병")
-            print("3. 정보보호병")
-            print("4. 전산장비병")
-            print("5. 운영통제실병사")
-            
-            role_choice = input("원하는 역할의 번호를 선택하세요: ")
-            roles = {
-                '1': "무선병",
-                '2': "유선병",
-                '3': "정보보호병",
-                '4': "전산장비병",
-                '5': "운영통제실병사"
-            }
-            role = roles.get(role_choice)
-            if role:
-                trainings = get_training_by_role(cursor, role)
-                if trainings:
-                    print("\n훈련 일정 조회 결과:")
-                    for training in trainings:
-                        print(f"ID: {training[0]}, 이름: {training[1]}, 날짜: {training[2]}, 내용: {training[3]}")
-                else:
-                    print("해당 역할의 훈련 일정이 없습니다.")
+            trainings = get_all_trainings(cursor)
+            if trainings:
+                print("\n모든 병사의 훈련 일정 조회 결과:")
+                for training in trainings:
+                    print(f"병사 ID: {training[0]}, 이름: {training[1]}, 역할: {training[2]}, 날짜: {training[3]}, 내용: {training[4]}")
             else:
-                print("잘못된 입력입니다.")
+                print("등록된 훈련 일정이 없습니다.")
 
         elif choice == '3':
             print("종료합니다.")
@@ -247,7 +231,7 @@ def main():
                 manage_personal_info(cursor)
             elif choice == '2':
                 manage_training_schedule(cursor)
-            elif choice == '3':
+            elif choice:
                 print("프로그램을 종료합니다.")
                 break
             else:
@@ -262,7 +246,7 @@ def main():
 
     finally:
         cursor.close()
-        conn.close()
+        conn.close()  # 연결 종료
 
 if __name__ == "__main__":
     main()
