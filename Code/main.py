@@ -15,8 +15,8 @@ def hash_password(password):
 def try_connection(user_name, user_password):
     connection = psycopg2.connect(
         database = "db_termp",
-        user = 'termp_login',
-        password = 'login',
+        user = 'admin',
+        password = 'admin',
         host = "::1",
         port = "5432"
         )
