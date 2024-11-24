@@ -1,0 +1,35 @@
+1)
+psql -U postgres -h localhost
+
+2)
+CREATE USER admin WITH encrypted password 'admin';
+CREATE USER login WITH encrypted password 'login';
+CREATE USER wireless_operator WITH encrypted password 'wireless_operator';
+CREATE USER field_wireman WITH encrypted password 'field_wireman';
+CREATE USER cybersecurity_soldier WITH encrypted password 'cybersecurity_soldier';
+CREATE USER computer_technician WITH encrypted password 'computer_technician';
+
+3)
+CREATE tablespace ts_termp
+owner admin
+location 'D:\Program Files\PostgreSQL\15\data\db_termp';
+
+4)
+CREATE database db_termp
+owner admin
+tablespace ts_termp;
+
+5) \q
+
+6) psql -U postgres -h localhost -d db_termp
+
+create table users(
+id integer primary key,
+user_name varchar(20) unique not null,
+password char(64) unique not null
+);
+
+insert into users values
+(1, 'apple', '3a7bd3e2360a3d29eea436fcfb7e44c735d117c42d1c1835420b6b9942dd4f1b'),
+(2, 'banana', 'b493d48364afe44d11c0165cf470a4164d1e2609911ef998be868d46ade3de4e'),
+(3, 'carrot', 'b96482290a873ee9875236c0b4455988a10a7ec28bba60419d449429d0ced0e0');
