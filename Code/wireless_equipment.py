@@ -79,13 +79,13 @@ def delete_wireless_equipment(cursor, equipment_id):
                    """)
 # 사고 목록 조회 함수
 def read_incidents(cursor):
-    cursor.execute("SELECT * FROM incident_reports_view;")
+    cursor.execute("SELECT id, contact, details, wireless_tool_name, wireless_tool_quantity, department FROM incident_reports WHERE wireless_tool_quantity > 0;")
     return cursor.fetchall() or []
 
 # 무선 장비 사용 함수
 def use_wireless_equipment(cursor, incident_id):
     # 사고 정보 조회하여 필요한 장비 이름과 수량 불러옴
-    cursor.execute("SELECT contact, details, wireless_tool_name, wireless_tool_quantity, department FROM incident_details_view WHERE id = %s;", (incident_id,))
+    cursor.execute("SELECT contact, details, wireless_tool_name, wireless_tool_quantity, department FROM incident_reports WHERE id = %s;", (incident_id,))
     incident = cursor.fetchone()
 
     if incident:
@@ -104,7 +104,7 @@ def use_wireless_equipment(cursor, incident_id):
                 print("수리가 완료되었습니다.")
             else:
                 shortage = tool_quantity - available_quantity
-                print(f"도구의 개수가 부족합니다! {shortage}개가 필요합니다.")
+                print(f"{tool_name}의 개수가 부족합니다! {tool_name}: {shortage}개가 필요합니다.")
         else:
             print("도구가 존재하지 않습니다!")
     else:
@@ -174,15 +174,47 @@ def main():
                 print("해당 이름의 장비가 없습니다.")
 
         elif choice == '3':
-            name = input("업데이트할 장비의 이름을 입력하세요: ")
-            equipment = perform_crud_operations(user_name, user_password, 'search', name)  # 장비 검색
-            if equipment:
-                print(f"현재 장비 정보 - ID: {equipment[0][0]}, 이름: {equipment[0][1]}, 수량: {equipment[0][2]}")
-                quantity = int(input("장비 수량을 입력하세요: "))
-                perform_crud_operations(user_name, user_password, 'update_quantity', equipment[0][0], quantity)  # 장비 수량 업데이트
-                print("장비 수량이 업데이트되었습니다.")
+            print("무엇을 하시겠습니까?\n1. 장비 가져감.\n2. 장비 반납.")
+            sub_choice = input("숫자 선택: ")
+
+            if sub_choice == '1':
+                name = input("가져갈 장비의 이름을 입력하세요: ")
+                equipment = perform_crud_operations(user_name, user_password, 'search', name) # 장비 검색
+                if equipment:
+                    available_quantity = equipment[0][2]
+                    try:
+                        quantity = int(input("가져갈 장비 수량을 입력하세요: "))
+                        if quantity < 0:
+                            raise ValueError("수량은 음수가 될 수 없습니다.")
+                        if available_quantity >= quantity:
+                            new_quantity = available_quantity - quantity
+                            perform_crud_operations(user_name, user_password, 'update_quantity', equipment[0][0], new_quantity) # 장비 수량 업데이트
+                            print(f"{name} 장비를 {quantity}개 가져갔습니다. 남은 수량: {new_quantity}")
+                        else:
+                            print(f"{name}의 수량이 부족합니다! 현재 수량: {available_quantity}")
+                    except ValueError as e:
+                        print(f"잘못된 입력: {e}")
+                else:
+                    print(f"{name}을 가진 이름의 장비는 없습니다.")
+            
+            elif sub_choice == '2':
+                name = input("반납할 장비의 이름을 입력하세요: ")
+                equipment = perform_crud_operations(user_name, user_password, 'search', name) # 장비 검색
+                try:
+                        quantity = int(input("반납할 장비 수량을 입력하세요: "))
+                        if quantity < 0:
+                            raise ValueError("수량은 음수가 될 수 없습니다.")
+                        if equipment:
+                            new_quantity = equipment[0][2] + quantity
+                            perform_crud_operations(user_name, user_password, 'update_quantity', equipment[0][0], new_quantity) # 장비 수량 업데이트
+                            print(f"{name} 장비를 {quantity}개 반납했습니다. 현재 수량: {new_quantity}")
+                        else:
+                            perform_crud_operations(user_name, user_password, 'create', name, quantity) # 장비 생성
+                            print(f"{name} 장비가 {quantity}개 반납되었습니다. 현재 수량: {quantity}")
+                except ValueError as e:
+                    print(f"잘못된 입력: {e}")
             else:
-                print("해당 이름의 장비가 없습니다.")
+                print("잘못된 입력입니다. 다시 시도하세요.")
 
         elif choice == '4':
             name = input("삭제할 장비의 이름을 입력하세요: ")
