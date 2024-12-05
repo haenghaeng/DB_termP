@@ -85,12 +85,12 @@ def read_incidents(cursor):
 # 무선 장비 사용 함수
 def use_wireless_equipment(cursor, incident_id):
     # 사고 정보 조회하여 필요한 장비 이름과 수량 불러옴
-    cursor.execute("SELECT contact, details, wireless_tool_name, wireless_tool_quantity FROM incident_details_view WHERE id = %s;", (incident_id,))
+    cursor.execute("SELECT contact, details, wireless_tool_name, wireless_tool_quantity, department FROM incident_details_view WHERE id = %s;", (incident_id,))
     incident = cursor.fetchone()
 
     if incident:
-        contact, details, tool_name, tool_quantity = incident
-        print(f"사고 ID: {incident_id}, 연락처: {contact}, 내용: {details}, 필요한 장비: {tool_name}, 수량: {tool_quantity}")
+        contact, details, tool_name, tool_quantity, department = incident
+        print(f"사고 ID: {incident_id}, 사고 발생 부서: {department}, 연락처: {contact}, 내용: {details}, 필요한 장비: {tool_name}, 수량: {tool_quantity}")
 
         cursor.execute("SELECT quantity FROM wireless_equipment WHERE name = %s;", (tool_name,))
         equipment = cursor.fetchone()
@@ -128,8 +128,8 @@ def perform_crud_operations(user_name, user_password, operation, *args):
         use_wireless_equipment(cursor, *args)  # 장비 사용
     elif operation == 'read_incidents':
         return read_incidents(cursor)  # 사고 목록 조회
-    elif operation == 'read':
-        result = read_wireless_equipment(cursor)
+    #elif operation == 'read':
+    #    result = read_wireless_equipment(cursor)
     else:
         print("Invalid operation.")  # 유효하지 않은 작업
 
@@ -199,7 +199,7 @@ def main():
             if incident_list:
                 print("현재 해결할 수 있는 사고 목록:")
                 for incident in incident_list:
-                    print(f"ID: {incident[0]}, 연락처: {incident[1]}, 내용: {incident[2]}, 필요한 장비: {incident[3]}, 수량: {incident[4]}")
+                    print(f"ID: {incident[0]}, 사고 발생 부서: {incident[5]}, 연락처: {incident[1]}, 내용: {incident[2]}, 필요한 장비: {incident[3]}, 수량: {incident[4]}")
 
                 incident_id = int(input("해결하고 싶은 사고의 ID를 입력하세요: "))
                 perform_crud_operations(user_name, user_password, 'use', incident_id)  # 장비 사용
