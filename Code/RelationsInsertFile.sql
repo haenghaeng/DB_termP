@@ -115,12 +115,12 @@ SELECT id, name, quantity
 FROM wireless_equipment 
 ORDER BY id ASC;
 CREATE VIEW incident_reports_view AS
-SELECT id, contact, details, wireless_tool_name, wireless_tool_quantity
+SELECT id, contact, details, wireless_tool_name, wireless_tool_quantity, department
 FROM incident_reports
 WHERE wireless_tool_quantity > 0
 ORDER BY id ASC;
 CREATE VIEW incident_details_view AS
-SELECT id, contact, details, wireless_tool_name, wireless_tool_quantity
+SELECT id, contact, details, wireless_tool_name, wireless_tool_quantity, department
 FROM incident_reports
 WHERE wireless_tool_quantity > 0
 ORDER BY id ASC;
