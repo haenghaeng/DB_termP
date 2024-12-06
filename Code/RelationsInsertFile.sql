@@ -125,13 +125,21 @@ FROM incident_reports
 WHERE wireless_tool_quantity > 0
 ORDER BY id ASC;
 
-
+-- 사고 테이블 권한
 grant all on incident_reports to admin;
-grant all on wired_equipment to admin;
-grant all on wireless_equipment to admin;
-grant all on computer_equipment to admin;
 grant all on incident_messages to admin;
-GRANT SELECT ON wireless_equipment_view TO admin;
 GRANT SELECT ON incident_reports_view TO admin;
 GRANT SELECT ON incident_details_view TO admin;
+
+-- 유선반 테이블 관련 권한
+grant all on wired_equipment to admin;
+grant all on wired_equipment_id_seq to admin;
+
+-- 전장반 테이블 관련 권한 
+grant all on computer_equipment to admin;
+grant all on computer_equipment_id_seq to admin;
+
+-- 무선반 테이블 관련 권한
+grant all on wireless_equipment to admin;
+GRANT SELECT ON wireless_equipment_view TO admin;
 grant all on sequence wireless_equipment_id_seq to admin;  -- 시퀀스 권한 부여
