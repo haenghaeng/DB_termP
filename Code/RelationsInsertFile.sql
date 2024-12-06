@@ -68,15 +68,16 @@ CREATE TABLE incident_reports (
 );
 
 
--- 메세지 입력 테이블
+
+-- 메시지 테이블 생성
 CREATE TABLE incident_messages (
-            id SERIAL PRIMARY KEY,
-            incident_id INT REFERENCES incident_reports(id),
-            sender_department VARCHAR(20),
-            message VARCHAR(1024),
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-        
+    id SERIAL PRIMARY KEY,  -- 메시지 고유 ID
+    sender_department Edepartment,  -- 메시지를 보낸 부서
+    message VARCHAR(1024),  -- 메시지 내용
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP  -- 메시지 생성 시간
+);
+
+
 -- insert data
 -- wireless_equipment 테이블 입력
 INSERT INTO wireless_equipment (name, quantity) VALUES ('무전기', 10);
@@ -104,9 +105,9 @@ INSERT INTO incident_reports ( contact, details, related_units, department, wire
 
 
 -- incident_messages 테이블 입력
-INSERT INTO incident_messages (incident_id, sender_department, message) VALUES (1, '유선반', '전화기 선 연결 완료');
-INSERT INTO incident_messages (incident_id, sender_department, message) VALUES (2, '무선반', '전장반 지원 바람');
-INSERT INTO incident_messages (incident_id, sender_department, message) VALUES (3, '전장반', '지금 작업 중');
+INSERT INTO incident_messages (sender_department, message) VALUES ('유선반', '전화기 선 연결 완료');
+INSERT INTO incident_messages (sender_department, message) VALUES ('무선반', '전장반 지원 바람');
+INSERT INTO incident_messages (sender_department, message) VALUES ('전장반', '지금 작업 중');
 
 
 -- 무선 장비 뷰 생성 
@@ -130,6 +131,7 @@ grant all on incident_reports to admin;
 grant all on incident_messages to admin;
 GRANT SELECT ON incident_reports_view TO admin;
 GRANT SELECT ON incident_details_view TO admin;
+grant all on incident_reports_id_seq to admin;
 
 -- 유선반 테이블 관련 권한
 grant all on wired_equipment to admin;
@@ -143,3 +145,7 @@ grant all on computer_equipment_id_seq to admin;
 grant all on wireless_equipment to admin;
 GRANT SELECT ON wireless_equipment_view TO admin;
 grant all on sequence wireless_equipment_id_seq to admin;  -- 시퀀스 권한 부여
+
+-- 메시지 테이블 관련 권한
+grant all on incident_messages_id_seq to admin;
+
