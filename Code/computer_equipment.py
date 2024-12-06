@@ -101,6 +101,18 @@ def use_computer_equipment(cursor, incident_id):
     else:
         print("해결할 수 있는 사고가 없습니다.")
 
+# 메시지 전송 함수
+def send_message(cursor, sender_department, message):
+    cursor.execute("""
+        INSERT INTO incident_messages (sender_department, message)
+        VALUES (%s, %s);
+    """, (sender_department, message))
+
+# 메시지 목록 조회 함수
+def read_messages(cursor):
+    cursor.execute("SELECT sender_department, message, created_at FROM incident_messages ORDER BY created_at ASC;")
+    return cursor.fetchall()
+
 # CRUD 작업 수행 함수
 def perform_crud_operations(user_name, user_password, operation, *args):
     conn = try_connection(user_name, user_password)  # 데이터베이스 연결
@@ -118,6 +130,10 @@ def perform_crud_operations(user_name, user_password, operation, *args):
         use_computer_equipment(cursor, *args)  # 장비 사용
     elif operation == 'read_incidents':
         return read_incidents(cursor)  # 사고 목록 조회
+    elif operation == 'send_message':
+        send_message(cursor, *args)
+    elif operation == 'read_messages':
+        result = read_messages(cursor)
     else:
         print("Invalid operation.")  # 유효하지 않은 작업
 
@@ -130,6 +146,7 @@ def perform_crud_operations(user_name, user_password, operation, *args):
 def main():
     user_name = "admin"  # 사용자 이름
     user_password = "admin"  # 비밀번호
+    user_department = "전장반" # 메시지 보내는 반
 
     while True:
         print("\n전장반 장비 관리 시스템")
@@ -138,7 +155,8 @@ def main():
         print("3. 장비 수량 업데이트")  # 장비 수량 수정
         print("4. 장비 삭제")  # 장비 삭제
         print("5. 장비 사용")  # 장비 사용
-        print("6. 나가기")  # 프로그램 종료
+        print("6. 메시지")  # 메시지 전송
+        print("7. 나가기") # 프로그램 종료
         
         choice = input("원하는 기능의 숫자를 입력하세요: ")
 
@@ -222,12 +240,94 @@ def main():
                 for incident in incident_list:
                     print(f"ID: {incident[0]}, 사고 발생 부서: {incident[5]}, 연락처: {incident[1]}, 내용: {incident[2]}, 필요한 장비: {incident[3]}, 수량: {incident[4]}")
 
-                incident_id = int(input("해결하고 싶은 사고의 ID를 입력하세요: "))
-                perform_crud_operations(user_name, user_password, 'use', incident_id)  # 장비 사용
+                try:
+                    incident_id = int(input("해결하고 싶은 사고의 ID를 입력하세요: "))
+                    
+                    # ID가 목록에 존재하는지 확인
+                    valid_ids = [incident[0] for incident in incident_list]
+                    if incident_id not in valid_ids:
+                        print("해결할 수 없는 사고입니다. 목록에 없는 ID입니다.")
+                    else:
+                        perform_crud_operations(user_name, user_password, 'use', incident_id)  # 장비 사용
+                except ValueError:
+                    print("잘못된 입력입니다. 숫자를 입력하세요.")
             else:
                 print("현재 해결할 수 있는 사고가 없습니다.")
         
+        #메시지 기능        
         elif choice == '6':
+            messages = perform_crud_operations(user_name, user_password, 'read_messages')
+            if messages:
+                print("\n메시지 목록:")
+                for msg in messages:
+                    print(f"{msg[0]} - 내용: {msg[1]}")
+            else:
+                print("메시지가 없습니다.")
+            while True:
+                print("\n메시지 관리")
+                print("1. 메시지 보내기")
+                print("2. 메시지 삭제하기")
+                print("3. 나가기")
+                
+                sub_choice = input("원하는 기능의 숫자를 입력하세요: ").strip()
+                
+                if sub_choice == '1':  # 메시지 보내기
+                    message_content = input("보낼 메시지를 입력하세요: ").strip()
+                    if message_content:
+                        try:
+                            perform_crud_operations(user_name, user_password, 'send_message', user_department, message_content)
+                            print("메시지가 성공적으로 전송되었습니다.")
+                        except Exception as e:
+                            print(f"메시지 전송 중 오류 발생: {e}")
+                    else:
+                        print("메시지 내용이 비어있습니다. 다시 시도하세요.")
+                
+                elif sub_choice == '2':  # 메시지 삭제하기
+                    # 데이터베이스 연결 및 커서 생성
+                    conn = try_connection(user_name, user_password)
+                    cursor = conn.cursor()
+                    try:
+                        # 무선반에서 보낸 메시지만 조회
+                        cursor.execute("""
+                            SELECT id, message, created_at FROM incident_messages
+                            WHERE sender_department = %s
+                            ORDER BY created_at ASC;
+                        """, (user_department,))
+                        filtered_messages = cursor.fetchall()
+                        
+                        if filtered_messages:
+                            print("\n삭제 가능한 메시지 목록:")
+                            for idx, msg in enumerate(filtered_messages, start=1):
+                                print(f"ID: {msg[0]}, 내용: {msg[1]}, 보낸 시간: {msg[2]}")
+                            
+                            try:
+                                delete_id = int(input("삭제할 메시지의 ID를 입력하세요: ").strip())
+                                # 선택된 메시지 삭제
+                                cursor.execute("""
+                                    DELETE FROM incident_messages
+                                    WHERE id = %s AND sender_department = %s;
+                                """, (delete_id, user_department))
+                                conn.commit()
+                                print("메시지가 성공적으로 삭제되었습니다.")
+                            except ValueError:
+                                print("숫자를 입력하세요. 다시 시도하세요.")
+                        else:
+                            print("삭제할 메시지가 없습니다.")
+                    except Exception as e:
+                        print(f"오류 발생: {e}")
+                    finally:
+                        # 연결 닫기
+                        cursor.close()
+                        conn.close()
+                
+                elif sub_choice == '3':  # 나가기
+                    print("메시지 관리에서 나갑니다.")
+                    break
+                
+                else:
+                    print("잘못된 입력입니다. 다시 시도하세요.")
+
+        elif choice == '7':
             print("프로그램을 종료합니다.")  # 프로그램 종료 메시지
             break
         
