@@ -207,6 +207,7 @@ grant all on incident_reports to admin;
 grant all on incident_messages to admin;
 GRANT SELECT ON incident_reports_view TO admin;
 GRANT SELECT ON incident_details_view TO admin;
+grant all on incident_reports_id_seq to admin;
 
 -- 유선반 테이블 관련 권한
 grant all on wired_equipment to admin;
