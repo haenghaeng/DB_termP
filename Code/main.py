@@ -29,7 +29,7 @@ def try_connection(user_name, user_password):
         if cursor.fetchone():            
             query = psycopg2.sql.SQL(
                 '''
-                select user_name, user_password, ban
+                select user_name, user_password, department
                 from id_pw_view ipv
                 where ipv.user_name = %s and ipv.user_password = %s;
                 '''
