@@ -1,6 +1,7 @@
 import psycopg2
 import psycopg2.sql
 import hashpw
+import role_based_ui
 
 # 입력 받은 유저명과 비밀번호를 DB에서 확인합니다. 일치하면 True, 일치하지 않으면 False를 리턴합니다.
 def try_connection(user_name, user_password):
@@ -28,22 +29,23 @@ def try_connection(user_name, user_password):
         if cursor.fetchone():            
             query = psycopg2.sql.SQL(
                 '''
-                select user_name, user_password
+                select user_name, user_password, ban
                 from id_pw_view ipv
                 where ipv.user_name = %s and ipv.user_password = %s;
                 '''
             )            
             cursor.execute(query, (user_name, hashpw.hash_password(user_password)))
             
-            # 결과가 존재하면 True
-            if cursor.fetchone() :
-                return True
+            result = cursor.fetchone()
+            
+            # 결과가 존재하면 역할에 맞게 로그인
+            if result :
+                role_based_ui.login(result[2])
+
             else:
                 print("\n비밀번호가 틀렸습니다.")
-                return False  
         else:
             print("\n사용자가 존재하지 않습니다.")
-            return False
         
     except Exception as e:
         print(f"\n데이터베이스와 연결에 실패하였습니다. : {e}")
@@ -56,12 +58,8 @@ def try_connection(user_name, user_password):
 def login():  
     user_name = input("사용자명을 입력해주세요 ")
     user_password = input("비밀번호를 입력해주세요 ")
-
-    if(try_connection(user_name, user_password)):
-        print("\n로그인 성공")
-    else:
-        print("\n로그인 실패")
-
+    
+    try_connection(user_name, user_password)
 
 def main():
     while True:
