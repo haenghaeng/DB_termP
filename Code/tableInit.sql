@@ -65,13 +65,14 @@ drop user if exists admin;
 drop user if exists wireless_operator;
 drop user if exists field_wireman;
 drop user if exists computer_technician;
+drop user if exists etc;
 
 -- define enum
 drop type if exists Erank;
 create type Erank as enum('이병', '일병', '상병', '병장', '기타');
 
 drop type if exists Edepartment;
-create type Edepartment as enum('무선반', '유선반', '전장반', '운통반', '기타');
+create type Edepartment as enum('wireless_operator', 'field_wireman', 'computer_technician', 'admin', 'etc');
 
 -- create table
 create table soldier_information(
@@ -123,7 +124,8 @@ CREATE TABLE wired_equipment (
             name VARCHAR(20) NOT NULL,  -- 장비 이름
             quantity INT NOT NULL CHECK (quantity >= 0) -- 보유량(음수x)
         );
-
+      
+       
 -- 전장반
 CREATE TABLE computer_equipment (
             id SERIAL PRIMARY KEY,  -- 장비 고유 ID
@@ -163,10 +165,12 @@ CREATE TABLE incident_messages (
 
 -- create user
 create user login WITH encrypted password 'login';
+
 create user admin WITH encrypted password 'admin';
 create user wireless_operator WITH encrypted password 'wireless_operator';
 create user field_wireman WITH encrypted password 'field_wireman';
 create user computer_technician WITH encrypted password 'computer_technician';
+create user etc with encrypted password 'etc';
 
 
 
@@ -207,6 +211,7 @@ grant all on incident_reports to admin;
 grant all on incident_messages to admin;
 GRANT SELECT ON incident_reports_view TO admin;
 GRANT SELECT ON incident_details_view TO admin;
+grant all on incident_messages_id_seq to admin;
 
 -- 유선반 테이블 관련 권한
 grant all on wired_equipment to admin;
@@ -228,19 +233,19 @@ grant all on sequence wireless_equipment_id_seq to admin;  -- 시퀀스 권한 �
 -- insert data
 -- 로그인 시 user_password는 user_name와 같습니다.
 -- 로그인 시 user_password는 user_name와 같습니다.
-insert into soldier_information(name, rank, department, user_name, user_password) values ('김지훈', '이병', '무선반', 'kimji', 'db7ac3a7700a1f3981c7d22492b32abfa1fd1d121861c7846281a89c94bcf197');
-insert into soldier_information(name, rank, department, user_name, user_password) values ('박준호', '상병', '무선반', 'parkj', '2cf6626d63acfe41530a6894c7a1fded4481c897721b4da6a220380659b5705b');
-insert into soldier_information(name, rank, department, user_name, user_password) values ('한재민', '상병', '무선반', 'hanjm', 'e6cb42ec2f8c19b4b59512877ee47a44b54a07447f07f23870941dbe2e60bd6f');
-insert into soldier_information(name, rank, department, user_name, user_password) values ('최재원', '병장', '유선반', 'cjw', '0fdd652011cc5d7fe74184281fe22cf9accb9c8b6319624c9817dcec32bb1965');
-insert into soldier_information(name, rank, department, user_name, user_password) values ('멍멍이', '이병', '유선반', 'doggy', '1433d68859090304120ab33c5523485492a24de68464810b770a5957b6d64ca1');
-insert into soldier_information(name, rank, department, user_name, user_password) values ('고양이', '상병', '유선반', 'cat', '77af778b51abd4a3c51c5ddd97204a9c3ae614ebccb75a606c3b6865aed6744e');
-insert into soldier_information(name, rank, department, user_name, user_password) values ('병아리', '이병', '전장반', 'ppi', '0fef65463b6dcae47253ec56684caa3cc9c3d04f5cc714d2858fa55f25adeafe');
-insert into soldier_information(name, rank, department, user_name, user_password) values ('코끼리', '병장', '전장반', 'kok', 'd6ba8bf227ba2c637c444a9f59764f28da0e06c868770f1be41278c536efb6b3');
-insert into soldier_information(name, rank, department, user_name, user_password) values ('노트북', '상병', '전장반', 'ntb', 'c9dd3c0f1d24bb73d409bf6770f2ad8e2e9077ff3c60093bba6764d5b96bb261');
-insert into soldier_information(name, rank, department, user_name, user_password) values ('부산대', '병장', '운통반', 'pnu', '9e05e9e7c7fdacac968755b0d07b035a1aca1d06501dd6921db0dd3dc73b1294');
-insert into soldier_information(name, rank, department, user_name, user_password) values ('가오리', '상병', '운통반', 'gaori', '1f9d94c463cc64a2460673b8817520063e16a78352c5b39de52410e25e494eeb');
-insert into soldier_information(name, rank, department, user_name, user_password) values ('비빔밥', '병장', '운통반', 'bibim', '44551e48c7582972cf461c7f5b9575a82f76bf4a2d9b615fe050560ed2a0fad4');
-insert into soldier_information(name, rank, department, user_name, user_password) values ('비빔밥', '일병', '기타', 'bimbi', 'd8b8516c58c615932c0c48471edb8b5af8f98f7743f33745f2e51f7e35cdedf2');
+insert into soldier_information(name, rank, department, user_name, user_password) values ('김지훈', '이병', 'wireless_operator', 'kimji', 'db7ac3a7700a1f3981c7d22492b32abfa1fd1d121861c7846281a89c94bcf197');
+insert into soldier_information(name, rank, department, user_name, user_password) values ('박준호', '상병', 'wireless_operator', 'parkj', '2cf6626d63acfe41530a6894c7a1fded4481c897721b4da6a220380659b5705b');
+insert into soldier_information(name, rank, department, user_name, user_password) values ('한재민', '상병', 'wireless_operator', 'hanjm', 'e6cb42ec2f8c19b4b59512877ee47a44b54a07447f07f23870941dbe2e60bd6f');
+insert into soldier_information(name, rank, department, user_name, user_password) values ('최재원', '병장', 'field_wireman', 'cjw', '0fdd652011cc5d7fe74184281fe22cf9accb9c8b6319624c9817dcec32bb1965');
+insert into soldier_information(name, rank, department, user_name, user_password) values ('멍멍이', '이병', 'field_wireman', 'doggy', '1433d68859090304120ab33c5523485492a24de68464810b770a5957b6d64ca1');
+insert into soldier_information(name, rank, department, user_name, user_password) values ('고양이', '상병', 'field_wireman', 'cat', '77af778b51abd4a3c51c5ddd97204a9c3ae614ebccb75a606c3b6865aed6744e');
+insert into soldier_information(name, rank, department, user_name, user_password) values ('병아리', '이병', 'computer_technician', 'ppi', '0fef65463b6dcae47253ec56684caa3cc9c3d04f5cc714d2858fa55f25adeafe');
+insert into soldier_information(name, rank, department, user_name, user_password) values ('코끼리', '병장', 'computer_technician', 'kok', 'd6ba8bf227ba2c637c444a9f59764f28da0e06c868770f1be41278c536efb6b3');
+insert into soldier_information(name, rank, department, user_name, user_password) values ('노트북', '상병', 'computer_technician', 'ntb', 'c9dd3c0f1d24bb73d409bf6770f2ad8e2e9077ff3c60093bba6764d5b96bb261');
+insert into soldier_information(name, rank, department, user_name, user_password) values ('부산대', '병장', 'admin', 'pnu', '9e05e9e7c7fdacac968755b0d07b035a1aca1d06501dd6921db0dd3dc73b1294');
+insert into soldier_information(name, rank, department, user_name, user_password) values ('가오리', '상병', 'admin', 'gaori', '1f9d94c463cc64a2460673b8817520063e16a78352c5b39de52410e25e494eeb');
+insert into soldier_information(name, rank, department, user_name, user_password) values ('비빔밥', '병장', 'admin', 'bibim', '44551e48c7582972cf461c7f5b9575a82f76bf4a2d9b615fe050560ed2a0fad4');
+insert into soldier_information(name, rank, department, user_name, user_password) values ('비빔밥', '일병', 'etc', 'bimbi', 'd8b8516c58c615932c0c48471edb8b5af8f98f7743f33745f2e51f7e35cdedf2');
 
 insert into wireless_operator values (1, '지원대대', '0515671234');
 insert into wireless_operator values (2, '기지전대', '0512223456');
@@ -275,13 +280,13 @@ INSERT INTO computer_equipment (name, quantity) VALUES ('프린터기', 40);
 
 -- incident_reports 테이블 입력
 INSERT INTO incident_reports ( contact, details, related_units, department, wireless_tool_name, wireless_tool_quantity, wired_tool_name, wired_tool_quantity, computer_tool_name, computer_tool_quantity ) VALUES
-('01012345678', '전화기 수화기 선 끊어짐, 컴퓨터 모니터 깨짐', '{"유선반", "전장반"}', '멍멍대대', '무전기', 2, 'UTP 케이블', 3, '모니터', 1);
+('01012345678', '전화기 수화기 선 끊어짐, 컴퓨터 모니터 깨짐', '{"field_wireman", "computer_technician"}', '멍멍대대', '무전기', 2, 'UTP 케이블', 3, '모니터', 1);
 INSERT INTO incident_reports ( contact, details, related_units, department, wireless_tool_name, wireless_tool_quantity, wired_tool_name, wired_tool_quantity, computer_tool_name, computer_tool_quantity ) VALUES
-('01087654321', '무전기 3개 분실', '{"무선반"}', '왈왈대대', '무전기', 3, '전화기', 0, '프린터기', 0);
+('01087654321', '무전기 3개 분실', '{"wireless_operator"}', '왈왈대대', '무전기', 3, '전화기', 0, '프린터기', 0);
 INSERT INTO incident_reports ( contact, details, related_units, department, wireless_tool_name, wireless_tool_quantity, wired_tool_name, wired_tool_quantity, computer_tool_name, computer_tool_quantity ) VALUES
-('01013572468', '작업 도중 케이블 끊어짐', '{"유선반", "전장반"}', '무슨대대', '핸드폰', 1, 'UTP 케이블', 1, '본체', 1);
+('01013572468', '작업 도중 케이블 끊어짐', '{"field_wireman", "computer_technician"}', '무슨대대', '핸드폰', 1, 'UTP 케이블', 1, '본체', 1);
 
 -- incident_messages 테이블 입력
-INSERT INTO incident_messages (incident_id, sender_department, message) VALUES (1, '유선반', '전화기 선 연결 완료');
-INSERT INTO incident_messages (incident_id, sender_department, message) VALUES (2, '무선반', '전장반 지원 바람');
-INSERT INTO incident_messages (incident_id, sender_department, message) VALUES (3, '전장반', '지금 작업 중');
+INSERT INTO incident_messages (incident_id, sender_department, message) VALUES (1, 'field_wireman', '전화기 선 연결 완료');
+INSERT INTO incident_messages (incident_id, sender_department, message) VALUES (2, 'wireless_operator', '전장반 지원 바람');
+INSERT INTO incident_messages (incident_id, sender_department, message) VALUES (3, 'computer_technician', '지금 작업 중');
