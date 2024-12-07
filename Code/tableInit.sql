@@ -221,6 +221,9 @@ grant all on wireless_equipment to admin;
 GRANT SELECT ON wireless_equipment_view TO admin;
 grant all on sequence wireless_equipment_id_seq to admin;  -- 시퀀스 권한 부여
 
+-- 메시지 테이블 관련 권한
+grant all on incident_messages_id_seq to admin;
+
 
 
 
