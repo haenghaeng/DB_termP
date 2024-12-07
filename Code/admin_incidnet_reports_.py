@@ -121,15 +121,18 @@ def delete_incident(cursor, incident_id):
     except psycopg2.Error as e:
         print(f"데이터베이스 오류: {e}")
 
-# 사고 해결 함수
 def solve_incident(cursor):
     try:
-        # 무선반, 유선반, 전장반 수량이 모두 0인 사건 조회
+        # GROUP BY와 HAVING을 사용하여 조건에 맞는 사고만 조회
         cursor.execute("""
-            SELECT * FROM incident_reports 
-            WHERE wireless_tool_quantity = 0 
-            AND wired_tool_quantity = 0 
-            AND computer_tool_quantity = 0;
+            SELECT id, contact, details, department, 
+                   wireless_tool_quantity, wired_tool_quantity, computer_tool_quantity
+            FROM incident_reports
+            GROUP BY id, contact, details, department, 
+                     wireless_tool_quantity, wired_tool_quantity, computer_tool_quantity
+            HAVING SUM(wireless_tool_quantity) = 0 
+               AND SUM(wired_tool_quantity) = 0 
+               AND SUM(computer_tool_quantity) = 0;
         """)
         incidents = cursor.fetchall()
         if incidents:
@@ -139,23 +142,20 @@ def solve_incident(cursor):
                 print(f"ID: {incident[0]}")
                 print(f"전화번호: {incident[1]}")
                 print(f"사고 내용: {incident[2]}")
-                print(f"관련 부서: {incident[3]}")
-                print(f"사고 발생 장소: {incident[4]}")
-                print(f"무선반 장비: {incident[5]}")
-                print(f"무선반 장비 개수: {incident[6]}")
-                print(f"유선반 장비: {incident[7]}")
-                print(f"유선반 장비 개수: {incident[8]}")
-                print(f"전장반 장비: {incident[9]}")
-                print(f"전장반 장비 개수: {incident[10]}")
+                print(f"사고 발생 부서: {incident[3]}")
+                print(f"무선반 장비 개수: {incident[4]}")
+                print(f"유선반 장비 개수: {incident[5]}")
+                print(f"전장반 장비 개수: {incident[6]}")
                 print("--------------------")
                 choice = input(f"사고 ID {incident[0]}를 해결하시겠습니까? (y/n): ")
                 if choice.lower() == 'y':
                     cursor.execute("DELETE FROM incident_reports WHERE id = %s;", (incident[0],))
-                    print(f"사고 보고 ID {incident[0]}이(가) 삭제되었습니다.")
+                    print(f"사고 보고 ID {incident[0]}이(가) 해결되었습니다.")
         else:
             print("해결 처리 가능한 사고가 없습니다.")
     except psycopg2.Error as e:
         print(f"데이터베이스 오류: {e}")
+
 
 
 # CRUD 작업 수행 함수
