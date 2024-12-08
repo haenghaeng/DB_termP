@@ -130,23 +130,31 @@ def update_incident(cursor):
     try:
         incident_id = int(input("수정할 사고 ID를 입력하세요: "))
         fields = {
-            '1': 'contact', '2': 'details', '3': 'related_units', '4': 'department',
-            '5': 'wireless_tool_name', '6': 'wireless_tool_quantity',
-            '7': 'wired_tool_name', '8': 'wired_tool_quantity',
-            '9': 'computer_tool_name', '10': 'computer_tool_quantity'
+            '1': ('contact', '연락처'),
+            '2': ('details', '사고 상세 내용'),
+            '3': ('related_units', '연계되는 반'),
+            '4': ('department', '사고 발생 부서'),
+            '5': ('wireless_tool_name', '필요한 무선 도구 이름'),
+            '6': ('wireless_tool_quantity', '필요한 무선 도구 수량'),
+            '7': ('wired_tool_name', '필요한 유선 도구 이름'),
+            '8': ('wired_tool_quantity', '필요한 유선 도구 수량'),
+            '9': ('computer_tool_name', '필요한 전장 도구 이름'),
+            '10': ('computer_tool_quantity', '필요한 전장 도구 수량')
         }
-        print("\n".join([f"{k}. {v}" for k, v in fields.items()]))
+        print("\n".join([f"{k}. {v[1]}" for k, v in fields.items()]))
         field_choice = input("수정할 필드를 선택하세요: ")
+        
         if field_choice in fields:
-            new_value = input("새로운 값을 입력하세요: ")
+            new_value = input(f"{fields[field_choice][1]}의 새로운 값을 입력하세요: ")
             if field_choice == '3':  # 만약 "연계되는 반"을 수정하는 경우
                 new_value = '{' + ','.join([unit_mapping[unit.strip()] for unit in new_value.split(',')]) + '}'
-            cursor.execute(f"UPDATE incident_reports SET {fields[field_choice]} = %s WHERE id = %s;", (new_value, incident_id))
+            cursor.execute(f"UPDATE incident_reports SET {fields[field_choice][0]} = %s WHERE id = %s;", (new_value, incident_id))
             print(f"사고 보고 ID {incident_id}가 업데이트되었습니다.")
     except ValueError:
         print("잘못된 입력입니다. 다시 시도하세요.")
     except Error as e:
         print(f"데이터베이스 오류: {e}")
+
 
 # 사고 삭제
 def delete_incident(cursor):
