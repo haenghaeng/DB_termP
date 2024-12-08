@@ -68,7 +68,7 @@ def admin_ui(department):
         elif action == "4":
             computer_equipment.main(department)
         elif action == "5":
-            admin_incident_reports.main(department)
+            admin_incident_reports.main()
         elif action == "6":
             print("종료합니다.")
             break

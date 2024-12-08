@@ -293,66 +293,6 @@ def manage_messages(cursor, department):
         else:
             print("잘못된 입력입니다. 다시 시도하세요.")
 
-
-
-# 메시지 관리 및 전송 함수
-def manage_messages(cursor, department):
-    while True:
-        print("\n메시지 관리")
-        print("1. 메시지 보내기")
-        print("2. 메시지 삭제하기")
-        print("3. 나가기")
-        
-        sub_choice = input("원하는 기능의 숫자를 입력하세요: ").strip()
-        
-        if sub_choice == '1': # 메시지 보내기
-            message_content = input("보낼 메시지를 입력하세요: ").strip()
-            if message_content:
-                try:
-                    # 메시지 보내기
-                    cursor.execute('INSERT INTO incident_messages (sender_department, message) VALUES (%s, %s);', (department, message_content))
-                    print("메시지가 성공적으로 전송되었습니다.")
-                except Exception as e:
-                    print(f"메시지 전송 중 오류 발생: {e}")
-            else:
-                print("메시지 내용이 비어있습니다. 다시 시도하세요.")
-        
-        elif sub_choice == '2': # 메시지 삭제하기
-            # 삭제 가능한 메시지 조회
-            delete_messages = read_all_messages(cursor)  # 메시지 목록 조회
-            
-            if delete_messages:
-                print("\n삭제 가능한 메시지 목록:")
-                for msg in delete_messages:
-                    if msg[1] == department:  # 자신의 부서에서 보낸 메시지인지 확인
-                        print(f"ID: {msg[0]}, 부서: {msg[1]}, 내용: {msg[2]}, 보낸 시간: {msg[3]}")
-                
-                try:
-                    delete_id = int(input("삭제할 메시지의 ID를 입력하세요: ").strip())
-                    # 해당 메시지가 자신의 부서에서 보낸 것인지 확인
-                    
-                    if any(msg[0] == delete_id and msg[1] == department for msg in delete_messages):
-                        # 메시지 삭제하기
-                        # args에는 삭제할 ID와 sender_department가 포함되어야 함
-                        cursor.execute('''
-                                       DELETE FROM incident_messages
-                                       WHERE id = %s AND sender_department = %s;
-                                       ''', (delete_id, department))
-                        print("메시지가 성공적으로 삭제되었습니다.")
-                    else:
-                        print("해당 ID의 메시지는 자신의 부서에서 보낸 것이 아니므로 삭제할 수 없습니다.")
-                except ValueError:
-                    print("숫자를 입력하세요. 다시 시도하세요.")
-            else:
-                print("삭제할 메시지가 없습니다.")
-        
-        elif sub_choice == '3':  # 나가기
-            print("메시지 관리에서 나갑니다.")
-            break
-        
-        else:
-            print("잘못된 입력입니다. 다시 시도하세요.")
-
 # CRUD 작업 수행 함수
 def crud_operations(operation, department):
     connection = try_connection(department)
