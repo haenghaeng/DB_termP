@@ -132,6 +132,7 @@ CREATE TABLE incident_messages (
 
 -- create user
 create user login WITH encrypted password 'login';
+
 create user admin WITH encrypted password 'admin';
 create user wireless_operator WITH encrypted password 'wireless_operator';
 create user field_wireman WITH encrypted password 'field_wireman';
@@ -169,6 +170,7 @@ grant all on soldier_information to admin;
 -- 사고 테이블 권한
 GRANT SELECT ON incident_reports_view TO admin;
 GRANT SELECT ON incident_details_view TO admin;
+grant all on incident_messages_id_seq to admin;
 
 grant all on incident_reports to admin;
 grant all on incident_reports to field_wireman;

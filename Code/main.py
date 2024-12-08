@@ -49,9 +49,10 @@ def try_connection(user_name, user_password):
         
     except Exception as e:
         print(f"\n데이터베이스와 연결에 실패하였습니다. : {e}")
-        return False
     
     finally:
+        connection.commit()
+        cursor.close()
         connection.close()
 
 # 사용자에게서 사용자명과 비밀번호를 받아 연결을 시도합니다.
