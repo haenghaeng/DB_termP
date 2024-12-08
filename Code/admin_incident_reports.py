@@ -16,12 +16,12 @@ unit_mapping_korean = {
 }
 
 # PostgreSQL 연결 설정
-def connect_to_db(user_name, user_password):
+def connect_to_db():
     try:
         return psycopg2.connect(
             database="db_termp",
-            user=user_name,
-            password=user_password,
+            user='admin',
+            password='admin',
             host="::1",
             port="5432"
         )
@@ -45,7 +45,7 @@ def validate_department(units, valid_units):
         raise ValueError(f"유효하지 않은 부서: {', '.join(invalid_units)}. 유효한 부서: {', '.join(valid_units)}")
 
 # 사고 생성
-def create_incident(cursor, valid_units):
+def create_incident(cursor):
     """새로운 사고 보고를 생성합니다."""
     try:
         contact = input("연락처를 입력하세요: ")
@@ -185,16 +185,13 @@ def solve_incident(cursor):
 
 # 메인 함수
 def main():
-    user_name, user_password = "admin", "admin"
-    valid_units = ['무선반', '유선반', '전장반']
-
-    with connect_to_db(user_name, user_password) as conn:
+    with connect_to_db() as conn:
         with conn.cursor() as cursor:
             while True:
                 print("\n[사고 보고]\n1. 생성\n2. 조회\n3. 수정\n4. 삭제\n5. 해결\n6. 종료")
                 choice = input("작업 선택: ")
                 if choice == '1':
-                    create_incident(cursor, valid_units)
+                    create_incident(cursor)
                 elif choice == '2':
                     read_incidents(cursor)
                 elif choice == '3':
@@ -210,6 +207,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-                        
