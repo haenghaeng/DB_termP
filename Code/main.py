@@ -19,9 +19,9 @@ def try_connection(user_name, user_password):
         # 입력값과 SQL 구문을 분리해야 SQL injection 위험이 없다고 하네용
         query = psycopg2.sql.SQL(
             '''
-            select user_name
-            from id_pw_view ipv 
-            where ipv.user_name = %s;
+            select army_number
+            from army_number_pw_dept_view
+            where army_number = %s;
             '''
         )    
         cursor.execute(query, (user_name,)) # 전달할 땐 tuple로 보내야 함
@@ -29,9 +29,9 @@ def try_connection(user_name, user_password):
         if cursor.fetchone():            
             query = psycopg2.sql.SQL(
                 '''
-                select user_name, user_password, department
-                from id_pw_view ipv
-                where ipv.user_name = %s and ipv.user_password = %s;
+                select army_number, user_password, department
+                from army_number_pw_dept_view
+                where army_number = %s and user_password = %s;
                 '''
             )            
             cursor.execute(query, (user_name, hashpw.hash_password(user_password)))
@@ -48,7 +48,7 @@ def try_connection(user_name, user_password):
             print("\n사용자가 존재하지 않습니다.")
         
     except Exception as e:
-        print(f"\n데이터베이스와 연결에 실패하였습니다. : {e}")
+        print(f"\n데이터베이스와 연결에 실패하였습니다.\n1{e}")
     
     finally:
         connection.commit()
@@ -57,7 +57,7 @@ def try_connection(user_name, user_password):
 
 # 사용자에게서 사용자명과 비밀번호를 받아 연결을 시도합니다.
 def login():  
-    user_name = input("사용자명을 입력해주세요 ")
+    user_name = input("군번을 입력해주세요 ")
     user_password = input("비밀번호를 입력해주세요 ")
     
     try_connection(user_name, user_password)
