@@ -132,7 +132,6 @@ CREATE TABLE incident_messages (
 
 -- create user
 create user login WITH encrypted password 'login';
-
 create user admin WITH encrypted password 'admin';
 create user wireless_operator WITH encrypted password 'wireless_operator';
 create user field_wireman WITH encrypted password 'field_wireman';
@@ -170,7 +169,6 @@ grant all on soldier_information to admin;
 -- 사고 테이블 권한
 GRANT SELECT ON incident_reports_view TO admin;
 GRANT SELECT ON incident_details_view TO admin;
-grant all on incident_messages_id_seq to admin;
 
 grant all on incident_reports to admin;
 grant all on incident_reports to field_wireman;
@@ -214,8 +212,7 @@ grant all on wireless_equipment to wireless_operator;
 grant all on sequence wireless_equipment_id_seq to wireless_operator;
 
 -- insert data
--- 로그인 시 user_password는 user_name와 같습니다.
--- 로그인 시 user_password는 user_name와 같습니다.
+-- 로그인 시 user_password는 army_number 같습니다.
 -- ex. id가 '19-70007563'이면 비밀번호도 '19-70007563'입니다.
 insert into soldier_information(army_number, name, rank, department, phone_number, user_password) values ('19-70007563', '김지훈', '이병', 'wireless_operator', '0508', 	'4170478182a252b7412d2dd51f00b3c34d546b8396bd4096f47d134f64c91918');
 insert into soldier_information(army_number, name, rank, department, phone_number, user_password) values ('18-70007563', '박준호', '상병', 'wireless_operator', '0508', 	'98e982c5ebbe62db749eb930303dd2f6ca600683bca9ba5d5637b87609735bba');
