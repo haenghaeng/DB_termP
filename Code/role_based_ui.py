@@ -5,11 +5,6 @@ import wireless_equipment
 import computer_equipment
 
 def login(department):    
-    # wireless_operator : 무선반
-    # field_wireman : 유선반
-    # computer_technician : 전자장비반
-    # admin : 운영통제반
-    # etc : 기타
     if department == 'wireless_operator':
         print('무선반 접속')
         wireless_operator_ui(department)       
@@ -61,7 +56,7 @@ def admin_ui(department):
     while True:
         action = input('\n원하는 기능의 숫자를 입력해주세요 \n(1) 병사 관리\n(2) 무선 장비 관리\n(3) 유선 장비 관리\n(4) 전자 장비 관리\n(5) 종료\n')
         if action == "1":
-            soldier_information_table.main(department)
+            soldier_information_table.main()
         elif action == "2":
             wireless_equipment.main(department)
         elif action == "3":
